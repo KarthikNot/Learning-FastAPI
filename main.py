@@ -55,3 +55,11 @@ def updateBlog(id : int, req : schemas.Blog, db : Session = Depends(get_db)):
     blog.update(req.model_dump())
     db.commit()
     return {'message' : f'Successfully updated the Blog with id {id}'}
+
+@app.post('/create-user/', status_code=status.HTTP_201_CREATED)
+def createUser(req : schemas.User, db : Session = Depends(get_db)):
+    newUser = models.User(name=req.name, email=req.email, password=req.password)
+    db.add(newUser)
+    db.commit()
+    db.refresh(newUser)
+    return {'message' : 'Successfully created a user!'}
