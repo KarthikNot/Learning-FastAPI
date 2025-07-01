@@ -53,4 +53,4 @@ def updateBlog(id : int, req : schemas.Blog, db : Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = f'Blog with id {id} not found!')
     blog.update(req.model_dump())
     db.commit()
-    return 'updated'
+    return {'message' : f'Successfully updated the Blog with id {id}'}
