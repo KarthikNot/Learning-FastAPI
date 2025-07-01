@@ -37,7 +37,7 @@ def getBlogById(id : int, res : Response, db : Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} not found.")
     return blog
 
-@app.delete('/delete-blog/{id}', status_code=status.HTTP_200_OK)
+@app.delete('/delete-blog/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def deleteBlog(id : int, db : Session = Depends(get_db)):
     db.query(models.Blog).filter(models.Blog.id == id).delete(synchronize_session = False)
     db.commit()
