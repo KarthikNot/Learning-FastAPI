@@ -1,9 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from schemas import Blog
-from database import engine
+from database import engine, SessionLocal
+from sqlalchemy.orm import Session
 import models
 
 models.base.metadata.create_all(engine)
+
+def get_db():
+    db = SessionLocal()
+    try: yield db
+    finally: db.close()
 
 app = FastAPI()
 
@@ -12,5 +18,9 @@ def health():
     return "App is healthy"
 
 @app.post('/blog')
-def createBlog(request : Blog):
-    return request
+def createBlog(request : Blog, db : Session = Depends(get_db)):
+    new_blog = models.Blog(title = request.title, body = request.body)
+    db.add(new_blog)
+    db.commit()
+    db.refresh(new_blog)
+    return new_blog
