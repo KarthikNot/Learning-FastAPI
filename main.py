@@ -24,3 +24,13 @@ def createBlog(request : Blog, db : Session = Depends(get_db)):
     db.commit()
     db.refresh(new_blog)
     return new_blog
+
+@app.get('/blog')
+def getBlogs(db : Session = Depends(get_db)):
+    blogs = db.query(models.Blog).all()
+    return blogs
+
+@app.get('/blog/{id}')
+def getBlogById(id : int, db : Session = Depends(get_db)):
+    blog = db.query(models.Blog).filter(models.Blog.id == id).first()
+    return blog
