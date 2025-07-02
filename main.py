@@ -3,6 +3,7 @@ from fastapi import FastAPI, Depends, status, Response, HTTPException
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 import models, schemas
+from hashing import encryptPassword
 
 models.base.metadata.create_all(engine)
 
@@ -58,8 +59,10 @@ def updateBlog(id : int, req : schemas.Blog, db : Session = Depends(get_db)):
 
 @app.post('/create-user/', status_code=status.HTTP_201_CREATED)
 def createUser(req : schemas.User, db : Session = Depends(get_db)):
-    newUser = models.User(name=req.name, email=req.email, password=req.password)
+    newPassword = encryptPassword(req.password)
+    newUser = models.User(name=req.name, email=req.email, password=newPassword)
     db.add(newUser)
     db.commit()
     db.refresh(newUser)
-    return {'message' : 'Successfully created a user!'}
+    return newUser
+    # return {'message' : 'Successfully created a user!'}
