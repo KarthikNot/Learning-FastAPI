@@ -18,27 +18,27 @@ app = FastAPI()
 def health():
     return "App is healthy"
 
-@app.post('/blog', status_code=status.HTTP_201_CREATED)
+@app.post('/blog', status_code=status.HTTP_201_CREATED, tags = ['blogs'])
 def createBlog(request : schemas.Blog, db : Session = Depends(get_db)):
-    new_blog = models.Blog(title = request.title, body = request.body)
+    new_blog = models.Blog(title = request.title, body = request.body, user_id = 1)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
     return new_blog
 
-@app.get('/blog', status_code = status.HTTP_200_OK, response_model = List[schemas.ShowBlog])
+@app.get('/blog', status_code = status.HTTP_200_OK, response_model = List[schemas.ShowBlog], tags = ['blogs'])
 def getBlogs(db : Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
     return blogs
 
-@app.get('/blog/{id}', status_code=status.HTTP_200_OK, response_model=schemas.ShowBlog)
+@app.get('/blog/{id}', status_code=status.HTTP_200_OK, response_model=schemas.ShowBlog, tags = ['blogs'])
 def getBlogById(id : int, res : Response, db : Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id).first()
     if not blog:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} not found.")
     return blog
 
-@app.delete('/delete-blog/{id}', status_code=status.HTTP_200_OK)
+@app.delete('/delete-blog/{id}', status_code=status.HTTP_200_OK, tags = ['blogs'])
 def deleteBlog(id : int, db : Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id)
     if not blog:
@@ -48,7 +48,7 @@ def deleteBlog(id : int, db : Session = Depends(get_db)):
 
     return 'Done'
 
-@app.put('/update-blog/{id}', status_code = status.HTTP_202_ACCEPTED)
+@app.put('/update-blog/{id}', status_code = status.HTTP_202_ACCEPTED, tags = ['blogs'])
 def updateBlog(id : int, req : schemas.Blog, db : Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id)
     if not blog:
@@ -57,7 +57,7 @@ def updateBlog(id : int, req : schemas.Blog, db : Session = Depends(get_db)):
     db.commit()
     return {'message' : f'Successfully updated the Blog with id {id}'}
 
-@app.post('/create-user/', status_code=status.HTTP_201_CREATED)
+@app.post('/create-user/', status_code=status.HTTP_201_CREATED, response_model=schemas.showUser)
 def createUser(req : schemas.User, db : Session = Depends(get_db)):
     newPassword = encryptPassword(req.password)
     newUser = models.User(name=req.name, email=req.email, password=newPassword)
@@ -66,3 +66,10 @@ def createUser(req : schemas.User, db : Session = Depends(get_db)):
     db.refresh(newUser)
     return newUser
     # return {'message' : 'Successfully created a user!'}
+
+@app.get('/user/{id}', status_code=status.HTTP_200_OK, response_model=schemas.showUser)
+def getUser(id : int, db : Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
+    if not user:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f'User with {id} not found!')
+    return user
