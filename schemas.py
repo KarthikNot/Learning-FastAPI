@@ -25,3 +25,7 @@ class ShowBlog(BaseModel):
     creator : showUser
 
     class Config(): orm_model = True
+
+class Login(BaseModel):
+    username : str
+    password : str
